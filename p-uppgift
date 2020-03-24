@@ -1,0 +1,316 @@
+"""Specifikation till P-uppgift 124: Packlistor till resor
+    Beskrivning:
+    • Programmet ska hantera olika packlistor.
+    • Användaren ska kunna skapa en packlista, söka efter och visa redan existerande
+      packlista, lägga till eller ta bort föremål i listan.
+    • Alla listor ska gå att visa sorterade efter datum.
+    • Efter kört program ska all listdata sparas på samma fil som öppnats vid start.
+    Algoritm:
+    1. Programmet läser in alla packlistor från fil.
+    2. Tills användaren väljer att sluta upprepas:
+        - Menyn visas
+        - Ett menyval tas emot av användaren
+        - Information gällande menyval läses in (tex datum, sökord, namn på
+          packlista, föremål att packa)
+        - Metod kopplad till menyvalet anropas tillsammans med rätt parametrar
+    3. När användaren väljer att avsluta ska den ändrade informationen angående ny
+    eller redan existerande packlista skrivas ut på filen igen.
+    Datastrukturer:
+    Varje packlista representeras av ett Packlista-objekt och är sparade i en dictionary med
+    sitt namn och datum som nyckel. Mellan programkörningarna lagras all data på en
+    textfil.
+
+    Side note: För att kalla på en packlistas objekt i klassen -> list_dict["name"]
+               Men i dictionaryn är objekten sparade med bara "name" som key.
+               """
+
+
+
+class Packing_list:
+    """
+    Attributes:
+    name: the name of the list
+    date: the date when the list is created
+    elements: a list of all elements that will be brought on the trip
+    marked_elements: a list with all marked elements
+    """
+
+    def __init__(self, name, date):
+        """Creates a new packing list
+        :param name: the name of the list
+        :param date: the date when the list is created"""
+        self.name = name
+        self.date = date
+        self.elements =[]
+        self.marked_elements = []
+
+    def object_to_list(self):
+        """Writes all attributes of an object into a list"""
+        object = [self.name, self.date, self.elements, self.marked_elements]
+        return object
+
+    def __str__(self):
+        """Packing list information will be printed out.
+        :return: A string including name, date and elements (both packed and not packed) of the
+        packing list sorted in alphabetic order."""
+
+        list = ""
+        for element in self.elements:
+            list += "\n   - " + element
+
+        marked_list = ""
+        for element in self.marked_elements:
+            marked_list += "\n   - " + element
+
+        return ("\nPACKING LIST:\n" + "Name: " + self.name + "\nDate: " + str(self.date) +
+                "\n\nDon't forget:\n" + list +
+                "\n " + marked_list)
+
+    def add_element(self):
+        """Used to add an element to the list. Asks for
+        input (the new element) then adds it to the list.
+        :return: a string confirming the successful act """
+        element = input("What object do you want to add?\n")
+        self.elements.append(element)
+        return print("Added!")
+
+    def remove_element(self):
+        """
+        Used to remove an element from a list. Prints out the elements existing in the list and asks
+        user which one to remove. The elements will be numbered so the program expects an int
+        (run get_int_input) and will only accept a number between 1 and (number of elements).
+        return: a string confirming the successful act, """
+
+
+    def mark_element_as_packed(self): #Inte prio
+        """ Used to mark an element as packed. Takes an element from the list elements and moves it
+        to the list marked elements.
+        return: a string confirming the successful act
+        """
+
+
+def read_lists_from_file(file_name):
+    """Used to get data from file. Checks for errors and if something is found it will print out on
+    which row and what error occurred. Then it moves on to the next packing list.
+    :param file_name: The file with the information
+    :return: A dictionary with all lists (as class objects) in it """
+    import ast
+    file = open(file_name, "r")
+    dict_from_file = ast.literal_eval(file.read())          #Imports a string and converts it into a dictionary
+    list_dict = {}
+    for key in dict_from_file:
+        list_of_object_attributes = dict_from_file[key]                     #Takes the value from the dict (a list) and
+        list_dict[key] = Packing_list(list_of_object_attributes[0],         #formats it back to a class object.
+                                      list_of_object_attributes[1])
+        list_dict[key].elements = list_of_object_attributes[2]
+        list_dict[key].marked_elements = list_of_object_attributes[3]
+    file.close()
+    return list_dict
+
+
+def write_lists_to_file(list_dict, file_name):
+    """Used to write the data to a file
+    :param list_dict: The dictionary with the lists saved as Packing_list objects
+    :param file_name: The file where all information will be saved.
+    :return: (nothing)
+    """
+    for key in list_dict:
+        list_dict[key] = list_dict[key].object_to_list()
+    file = open(file_name, "w")
+    file.write(str(list_dict))
+    file.close()
+
+
+
+def create_list():
+    """Used to create a new packing list. Takes input from user (name and elements) and send it
+    into the __init__-method together with todays_date. (self, name, date)
+    :return: a string confirming that the list where successfully created
+    """
+    name = input("The name of the list: ")
+    date = get_date_input("For which date is this list?")
+    list_dict[name] = Packing_list(name, date)
+    answer = get_int_input("Would you like to add items to the list as well?\n1 - Yes\n2 - No\n")
+    while True:
+        if 1 <= answer <= 2:
+            if answer == 1:
+                list_dict[name].add_element()
+                answer = get_int_input("Would you like to add another one?\n1 - Yes\n2 - No\n")
+            else:
+                print(list_dict[name])
+                break
+        else:
+            answer = get_int_input("Enter either 1 or 2.\n")
+
+
+
+def get_int_input(prompt_string):  # prompt_string = question
+    """Used to get an int from the user, asks again if input is not convertible to int
+    :param prompt_string: the string explaining what to input
+    :return: the int that was asked for"""
+    try:
+        number = int(input(prompt_string))
+        return number
+    except ValueError:
+        get_int_input("You didn't enter an integer, try again: ")
+
+
+def get_date_input(prompt_string):
+    """
+    Used to get date input from the user, asks again if input is not integers or a real date
+    :param prompt_string: the string explaining what to input
+    :return: an int with the date that was asked for """
+    global dd, mm, yyyy
+    print(prompt_string)
+    while True:
+        try:
+            while True:
+                year = input("Year (YYYY): ")
+                if len(year) == 4:
+                    yyyy = int(year)                               # If year != int, except ValueError
+                    if 1900 <= yyyy <= 2100:
+                        yyyy = str(yyyy)
+                        break
+                    elif yyyy < 1900:
+                        print("This was too long time ago. Please enter a later year.")
+                    elif yyyy > 2100:
+                        print("This is too far into the future. Please enter an earlier year.")
+                else:
+                    print("Enter year with four digits, please.")
+            while True:
+                month = int(input("Month (MM): "))
+                if 1 <= month <= 9:
+                    mm = str(0) + str(month)
+                    break
+                elif 10 <= month <= 12:
+                    mm = str(month)
+                    break
+                else:
+                    print("That is not a month. Try again.")
+            while True:
+                day = int(input("Day (DD): "))
+                if 1 <= day <= 9:
+                    dd = str(0) + str(day)
+                    break
+                elif 10 <= day <= 31:
+                    dd = str(day)
+                    break
+                else:
+                    print("That is not an existing day. Try again.")
+        except ValueError:
+            get_date_input("You didn't enter integers. Try again! ")
+        months_without_31_days = ("04", "06", "09", "11")
+        leap_years = list(range(1904, 2101, 4))
+        if dd == "31" and mm in months_without_31_days:
+            print(dd + "/" + mm + "-" + yyyy + " is not an existing date... Try again!")
+        elif dd in ("30", "31") and mm == "02" and yyyy in leap_years:
+            print(dd + "/" + mm + "-" + yyyy + " is not an existing date... Try again!")
+        elif dd in ("29", "30", "31") and mm == "02" and yyyy not in leap_years:
+            print(dd + "/" + mm + "-" + yyyy + " is not an existing date... Try again!")
+        else:
+            #print(dd + "/" + mm + "-" + yyyy)
+            return yyyy+mm+dd
+
+
+def upcoming_lists(date): # prio
+    """Used to display the coming lists after today’s date
+    :param date: today’s date (input from the beginning)
+    :return: (nothing)
+    """
+
+
+
+def search_for_list_by_name(): # prio
+    """Used to search for an existing list and show their content. Takes a string input from the user
+    that should contain characters existing in any of the names. If not, print a
+    string saying that no such list was found. If more than one list, show all lists whose name
+    contains the search word.
+    :return: the chosen list (referred to as class object)
+    """
+    search_word = input("Search for list by name: ")
+    while True:
+        list_of_packing_lists_matched = []
+        for key in list_dict.keys():
+            if search_word in key:
+                list_of_packing_lists_matched.append(key)
+        if len(list_of_packing_lists_matched) == 0:
+            print("No list were found.")
+            search_word = input("\nWrite a new search word:\n")
+        else:
+            print("Lists found:")
+            count = 1
+            connects_list_with_number = {}
+            for name_of_list in list_of_packing_lists_matched:
+                print(count, "-", name_of_list)
+                connects_list_with_number[count] = name_of_list
+                count += 1
+            chosen_list = get_int_input("Enter the number representing the list you're looking for:\n")
+            while True:
+                if 1 <= chosen_list <= len(connects_list_with_number.keys()):
+                    print(list_dict[connects_list_with_number[chosen_list]])
+                    break
+                else:
+                    chosen_list = get_int_input("That isn't an option. Try again:\n")
+            break
+
+def display_not_packed_elements():
+    """Used to display the elements that has not been marked as packed yet.
+    :return: prints out a string including name, date and elements (only not packed) of the
+    packing list sorted in alphabetic order.
+    """
+
+
+def sort_dict_on_date():
+    """Used to sort all packing list depending on date
+    :return:
+    """
+
+
+def menu():
+    """Used to display the menu.
+    :return: (nothing) """
+
+    return print("----------- MENU -----------\n"
+                 "\nWhat would you like to do?\n"
+                 "\n1 – Create a new packing list\n"
+                 "2 – Display content of list\n"
+                 "3 – Add an element to a list\n"
+                 "4 – Remove an element from a list\n"
+                 "5 - Display upcoming packing lists\n"
+                 "6 - Exit")
+
+
+def menu_choice():
+    """Used to get input on what the user wants to do
+    :return: choice = an int between 1 and 6, the chosen menu option
+    """
+    while True:
+        try:
+            menu_option = int(input("Enter option:"))
+            if 6 >= menu_option > 0:
+                return menu_option  # if input is between 1 and 6
+            else:
+                print("Write a number between 1 and 6.")
+        except ValueError:
+            print("You have to write an integer, try again.")
+
+
+def execute(choice):
+    """Used to execute the option that the user chooses
+    :param choice: an int corresponding to the chosen option
+    :return: (nothing)
+    """
+
+
+#list_dict = {}
+#list_dict["resa"] = Packing_list("resa", 20200123)
+#list_dict["resa"].elements = ["boll", "sax", "hus"]
+#list_dict["resa1"] = Packing_list("resa1", 20200913)
+list_dict = read_lists_from_file("saved_lists.txt")
+#print(list_dict["resa1"])
+#list_dict["resa2"] = Packing_list("resa2", 20200913)
+#list_dict["resa"].add_element()
+search_for_list_by_name()
+#get_date_input("What is today's date?")
+#create_list()
+write_lists_to_file(list_dict, "saved_lists.txt")
