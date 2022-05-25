@@ -1,4 +1,4 @@
-# Packing-Final-Assignment
+# Packing-List-Final-Assignment
 
 The final assignment in the course DD1318, which was the first programming course in the Media Technology program. I was assigned to do a packing list with the following criteria:
 
